@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_APP_NAME}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+
+  db:
+    image: ${DATABASE_IMAGE}
+    container_name: ${CONTAINER_DATABASE_NAME}
+    restart: always
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}

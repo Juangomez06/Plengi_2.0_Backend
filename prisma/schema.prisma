@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Measurement {
+  cm
+}
+
+enum TypeConstruction {
+  ck
+}
+
+model APU {
+  id               Int              @id @default(autoincrement())
+  name             String
+  measurement      Measurement
+  typeConstruction TypeConstruction @map("type_construction")
+  transport        Float
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime?        @updatedAt @map("updated_at")
+  deletedAt        DateTime?        @map("deleted_at")
+  activities       APU_Activity[]
+  materials        APU_Material[]
+  workteams        APU_WorkTeam[]
+  labours          APU_Labour[]
+
+  @@map("apus")
+}
+
+//Tabla intermedia actividades 
+model APU_Activity {
+  apu         APU        @relation(fields: [apu_id], references: [id])
+  apu_id      Int
+  activity    Activities @relation(fields: [activity_id], references: [id])
+  activity_id Int
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?  @updatedAt
+  deleted_at  DateTime?
+
+  @@id([apu_id, activity_id])
+  @@map("apu_activities")
+}
+
+//Actividades 
+model Activities {
+  id         Int            @id @default(autoincrement())
+  name       String
+  amount     Float
+  unexpected Float
+  order      Int
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime?      @updatedAt
+  deletedAt  DateTime?
+  apus       APU_Activity[]
+
+  @@map("activities")
+}
+
+//Tabla intermedia entre materiales 
+model APU_Material {
+  apu         APU       @relation(fields: [apu_id], references: [id])
+  apu_id      Int
+  material    Materials @relation(fields: [material_id], references: [id])
+  material_id Int
+  amount      Float
+  waste       Float?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  @@id([apu_id, material_id])
+  @@map("apu_materials")
+}
+
+model Materials {
+  id              Int            @id @default(autoincrement())
+  name            String
+  unitMeasurement String         @map("unit_measurement")
+  unitValue       Float          @map("unit_value")
+  providerType    String         @map("provider_type")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime?      @updatedAt @map("updated_at")
+  deletedAt       DateTime?      @map("deleted_at")
+  apus            APU_Material[]
+
+  @@map("materials")
+}
+
+//Tabla intermedia entre equipos de trabajo 
+model APU_WorkTeam {
+  apu         APU       @relation(fields: [apu_id], references: [id])
+  apu_id      Int
+  workteam    WorkTeams @relation(fields: [workteam_id], references: [id])
+  workteam_id Int
+  amount      Float
+  performance Float
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  @@id([apu_id, workteam_id])
+  @@map("apu_teams")
+}
+
+model WorkTeams {
+  id              Int            @id @default(autoincrement())
+  name            String
+  unitValue       Float          @map("unit_value")
+  unitMeasurement String         @map("unit_measurement")
+  teamType        String         @map("team_type")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime?      @updatedAt @map("updated_at")
+  deletedAt       DateTime?      @map("deleted_at")
+  apus            APU_WorkTeam[]
+
+  @@map("teams")
+}
+
+//Tabla intermedia entre equipos de trabajo 
+model APU_Labour {
+  apu         APU       @relation(fields: [apu_id], references: [id])
+  apu_id      Int
+  labour      Labours   @relation(fields: [labour_id], references: [id])
+  labour_id   Int
+  amount      Float
+  performance Float
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  @@id([apu_id, labour_id])
+  @@map("apu_labours")
+}
+
+model Labours {
+  id              Int          @id @default(autoincrement())
+  name            String
+  unitMeasurement String       @map("unit_measurement")
+  unitValue       Float        @map("unit_value")
+  workType        String       @map("work_type")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime?    @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
+  apus            APU_Labour[]
+
+  @@map("labours")
+}
